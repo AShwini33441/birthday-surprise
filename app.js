@@ -158,41 +158,66 @@ function showDownloadFallback(photoDataValue) {
 }
 
 generateBtn.addEventListener("click", async () => {
-  if (!photoDataRaw) {
-    photoStatus.textContent = "Please choose your photo first.";
-    return;
+  try {
+    if (!photoDataRaw) {
+      photoStatus.textContent = "Please choose your photo first.";
+      return;
+    }
+
+    photoStatus.textContent = "Preparing image...";
+
+    // Try to compress/rescale until it fits in URL; returns compressed version & finalUrl
+    const result = await tryCompressToFit(photoDataRaw);
+    if (!result) {
+      showDownloadFallback(photoDataRaw);
+      return;
+    }
+
+    // If even the compressed candidate is too long, show fallback
+    if (!result.finalUrl || result.finalUrl.length > URL_LENGTH_LIMIT) {
+      showDownloadFallback(result.dataUrl || photoDataRaw);
+      return;
+    }
+
+    // Success: use compressed data and finalUrl
+    photoData = result.dataUrl;
+    surpriseUrl = new URL(result.finalUrl);
+
+    qrBox.innerHTML = "";
+    const img = document.createElement("img");
+    img.alt = "Shareable birthday QR code";
+    const qrApiUrl = "https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=" + encodeURIComponent(result.finalUrl);
+    img.src = qrApiUrl;
+
+    // add load/error handlers to show status and help debug if necessary
+    img.onload = () => {
+      photoStatus.textContent = "QR created. Scan it to open the birthday surprise.";
+    };
+    img.onerror = (ev) => {
+      console.error('QR image failed to load', ev, qrApiUrl);
+      photoStatus.textContent = "Failed to load QR image from the QR service. Opening the link in a new tab as a fallback.";
+      // show a text link fallback so user can still open the surprise
+      urlBox.innerHTML = '';
+      const a = document.createElement('a');
+      a.href = result.finalUrl;
+      a.textContent = 'Open surprise link';
+      a.target = '_blank';
+      urlBox.appendChild(a);
+      // also try opening in new tab automatically (commented out for user control)
+      // window.open(result.finalUrl, '_blank');
+    };
+
+    qrBox.appendChild(img);
+
+    urlBox.textContent = result.finalUrl;
+    downloadBtn.disabled = false;
+    openBtn.disabled = false;
+    openBtn.classList.add("open");
+    // photoStatus updated by onload
+  } catch (err) {
+    console.error('Error during generate:', err);
+    photoStatus.textContent = 'An error occurred while generating the QR. See console for details.';
   }
-
-  photoStatus.textContent = "Preparing image...";
-
-  // Try to compress/rescale until it fits in URL; returns compressed version & finalUrl
-  const result = await tryCompressToFit(photoDataRaw);
-  if (!result) {
-    showDownloadFallback(photoDataRaw);
-    return;
-  }
-
-  // If even the compressed candidate is too long, show fallback
-  if (!result.finalUrl || result.finalUrl.length > URL_LENGTH_LIMIT) {
-    showDownloadFallback(result.dataUrl || photoDataRaw);
-    return;
-  }
-
-  // Success: use compressed data and finalUrl
-  photoData = result.dataUrl;
-  surpriseUrl = new URL(result.finalUrl);
-
-  qrBox.innerHTML = "";
-  const img = document.createElement("img");
-  img.alt = "Shareable birthday QR code";
-  img.src = "https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=" + encodeURIComponent(result.finalUrl);
-  qrBox.appendChild(img);
-
-  urlBox.textContent = result.finalUrl;
-  downloadBtn.disabled = false;
-  openBtn.disabled = false;
-  openBtn.classList.add("open");
-  photoStatus.textContent = "QR created. Scan it to open the birthday surprise.";
 });
 
 downloadBtn.addEventListener("click", async () => {
