@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Romantic Birthday Wishes</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <section class="card">
+      <h1>Romantic Birthday Wishes</h1>
+      <p class="intro">Create a shareable birthday QR code that opens a beautiful surprise page.</p>
+
+      <label class="upload">
+        <span>Choose Your Photo</span>
+        <input id="photoInput" type="file" accept="image/*">
+      </label>
+      <div id="photoStatus" class="status">Tip: Choose a photo before generating the QR code.</div>
+
+      <div class="actions">
+        <button id="generateBtn">Generate QR</button>
+        <button id="downloadBtn" disabled>Export Shareable QR</button>
+        <button id="openBtn" disabled>Open Surprise</button>
+      </div>
+
+      <div id="qrBox" class="qr-box">QR code will appear here</div>
+      <div id="urlBox" class="url"></div>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
