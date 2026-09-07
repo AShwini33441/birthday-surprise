@@ -45,19 +45,6 @@ generateBtn.addEventListener("click", () => {
   img.src = "https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=" + encodeURIComponent(finalUrl);
   qrBox.appendChild(img);
 
-  // Source - https://stackoverflow.com/a/72504677
-// Posted by Kim, modified by community. See post 'Timeline' for change history
-// Retrieved 2026-09-07, License - CC BY-SA 4.0
-
-fetch('https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=test&format=svg')
-.then(res => res.text())
-.then(res => {
-    const holder = document.createElement('div')
-    holder.innerHTML = res
-    console.log(holder.querySelector('path'))
-})
-
-
   urlBox.textContent = finalUrl;
   downloadBtn.disabled = false;
   openBtn.disabled = false;
